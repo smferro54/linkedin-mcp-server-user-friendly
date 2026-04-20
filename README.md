@@ -2,9 +2,9 @@
 
 <p align="left">
   <a href="https://pypi.org/project/linkedin-scraper-mcp/" target="_blank"><img src="https://img.shields.io/pypi/v/linkedin-scraper-mcp?color=blue" alt="PyPI"></a>
-  <a href="https://github.com/stickerdaniel/linkedin-mcp-server/actions/workflows/ci.yml" target="_blank"><img src="https://github.com/stickerdaniel/linkedin-mcp-server/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI Status"></a>
-  <a href="https://github.com/stickerdaniel/linkedin-mcp-server/actions/workflows/release.yml" target="_blank"><img src="https://github.com/stickerdaniel/linkedin-mcp-server/actions/workflows/release.yml/badge.svg?branch=main" alt="Release"></a>
-  <a href="https://github.com/stickerdaniel/linkedin-mcp-server/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/badge/License-Apache%202.0-%233fb950?labelColor=32383f" alt="License"></a>
+  <a href="https://github.com/smferro54/linkedin-mcp-server-user-friendly/actions/workflows/ci.yml" target="_blank"><img src="https://github.com/smferro54/linkedin-mcp-server-user-friendly/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI Status"></a>
+  <a href="https://github.com/smferro54/linkedin-mcp-server-user-friendly/actions/workflows/release.yml" target="_blank"><img src="https://github.com/smferro54/linkedin-mcp-server-user-friendly/actions/workflows/release.yml/badge.svg?branch=main" alt="Release"></a>
+  <a href="https://github.com/smferro54/linkedin-mcp-server-user-friendly/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/badge/License-Apache%202.0-%233fb950?labelColor=32383f" alt="License"></a>
 </p>
 
 Through this LinkedIn MCP server, AI assistants like Claude can connect to your LinkedIn. Access profiles and companies, search for jobs, or get job details.
@@ -14,7 +14,7 @@ Through this LinkedIn MCP server, AI assistants like Claude can connect to your 
 > **FAQ**
 >
 > **Is this safe to use? Will I get banned?**
-> This tool controls a real browser session; it doesn't exploit undocumented APIs or bypass authentication. That said, LinkedIn's TOS prohibit automated tools. With normal usage (not bulk scraping!) you're not risking a ban. So far, no users have been banned for using this MCP. If you encounter any issues, let me know in the [Discussions](https://github.com/stickerdaniel/linkedin-mcp-server/discussions).
+> This tool controls a real browser session; it doesn't exploit undocumented APIs or bypass authentication. That said, LinkedIn's TOS prohibit automated tools. With normal usage (not bulk scraping!) you're not risking a ban. So far, no users have been banned for using this MCP. If you encounter any issues, let me know in the [Discussions](https://github.com/smferro54/linkedin-mcp-server-user-friendly/discussions).
 >
 > **What if my agents execute too many actions?**
 > LinkedIn may send you a warning about automated tool usage. If that happens, reduce your automation volume. This MCP executes tool calls sequentially via a queue but has no built-in rate limits. Prompt your agents responsibly.
@@ -42,7 +42,7 @@ sudo apt update && sudo apt install -y git curl jq unzip python3 python3-pip
 curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 
-git clone https://github.com/stickerdaniel/linkedin-mcp-server.git
+git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
 cd linkedin-mcp-server
 uv sync
 
@@ -78,7 +78,7 @@ Then in CodeMie use:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install git curl jq uv ngrok/ngrok/ngrok
 
-git clone https://github.com/stickerdaniel/linkedin-mcp-server.git
+git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
 cd linkedin-mcp-server
 uv sync
 
@@ -126,7 +126,7 @@ brew install git curl jq uv
 ### Step 2: Clone this repository
 
 ```bash
-git clone https://github.com/stickerdaniel/linkedin-mcp-server.git
+git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
 cd linkedin-mcp-server
 ```
 
@@ -293,10 +293,10 @@ Press Ctrl+C in MCP and ngrok terminals.
 | Tool | Description | Status |
 |------|-------------|--------|
 | `get_person_profile` | Get profile info with explicit section selection (experience, education, interests, honors, languages, certifications, skills, projects, contact_info, posts) | working |
-| `connect_with_person` | Send a connection request or accept an incoming one, with optional note | [#365](https://github.com/stickerdaniel/linkedin-mcp-server/issues/365) |
+| `connect_with_person` | Send a connection request or accept an incoming one, with optional note | [#365](https://github.com/smferro54/linkedin-mcp-server-user-friendly/issues/365) |
 | `get_sidebar_profiles` | Extract profile URLs from sidebar recommendation sections ("More profiles for you", "Explore premium profiles", "People you may know") on a profile page | working |
 | `get_inbox` | List recent conversations from the LinkedIn messaging inbox | working |
-| `get_conversation` | Read a specific messaging conversation by username or thread ID | [#307](https://github.com/stickerdaniel/linkedin-mcp-server/issues/307) |
+| `get_conversation` | Read a specific messaging conversation by username or thread ID | [#307](https://github.com/smferro54/linkedin-mcp-server-user-friendly/issues/307) |
 | `search_conversations` | Search messages by keyword | working |
 | `send_message` | Send a message to a LinkedIn user (requires confirmation) | working |
 | `get_company_profile` | Extract company information with explicit section selection (posts, jobs) | working |
@@ -432,7 +432,7 @@ parallel. Use `--log-level DEBUG` to see scraper lock wait/acquire/release logs.
 
 **One-click installation** for Claude Desktop users:
 
-1. Download the latest `.mcpb` artifact from [releases](https://github.com/stickerdaniel/linkedin-mcp-server/releases/latest)
+1. Download the latest `.mcpb` artifact from [releases](https://github.com/smferro54/linkedin-mcp-server-user-friendly/releases/latest)
 2. Click the downloaded `.mcpb` file to install it into Claude Desktop
 3. Call any LinkedIn tool
 
@@ -588,7 +588,7 @@ Runtime server logs are emitted by FastMCP/Uvicorn.
 
 ## 🐍 Local Setup (Develop & Contribute)
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for architecture guidelines and checklists. Please [open an issue](https://github.com/stickerdaniel/linkedin-mcp-server/issues) first to discuss the feature or bug fix before submitting a PR.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for architecture guidelines and checklists. Please [open an issue](https://github.com/smferro54/linkedin-mcp-server-user-friendly/issues) first to discuss the feature or bug fix before submitting a PR.
 
 **Prerequisites:** [Git](https://git-scm.com/downloads) and [uv](https://docs.astral.sh/uv/) installed
 
@@ -596,7 +596,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for architectu
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/stickerdaniel/linkedin-mcp-server
+git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly
 cd linkedin-mcp-server
 
 # 2. Install UV package manager (if not already installed)
