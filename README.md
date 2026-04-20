@@ -19,6 +19,266 @@ Through this LinkedIn MCP server, AI assistants like Claude can connect to your 
 > **What if my agents execute too many actions?**
 > LinkedIn may send you a warning about automated tool usage. If that happens, reduce your automation volume. This MCP executes tool calls sequentially via a queue but has no built-in rate limits. Prompt your agents responsibly.
 
+## Non-Technical Quickstart (Ubuntu or macOS to CodeMie)
+
+Use this checklist if you want to run MCP on your laptop and connect CodeMie from outside your local network.
+
+### What you need
+
+1. A LinkedIn account you can log in to from a browser.
+2. A laptop (Ubuntu Linux or macOS).
+3. Internet access.
+4. A free ngrok account.
+5. CodeMie access.
+
+### Happy Path (copy/paste)
+
+Use this if you want the shortest path with minimal decisions.
+
+#### Ubuntu Happy Path
+
+```bash
+sudo apt update && sudo apt install -y git curl jq unzip python3 python3-pip
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+
+git clone https://github.com/stickerdaniel/linkedin-mcp-server.git
+cd linkedin-mcp-server
+uv sync
+
+# One-time LinkedIn login (browser opens)
+uv run -m linkedin_mcp_server --login
+
+# Terminal 1: run MCP server
+uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
+```
+
+Open a second terminal:
+
+```bash
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/ngrok.list
+sudo apt update && sudo apt install -y ngrok
+
+ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
+ngrok http 8000 --basic-auth="codemie:replace-with-strong-password"
+```
+
+Then in CodeMie use:
+
+1. URL: `https://<your-ngrok-subdomain>.ngrok-free.dev/mcp`
+2. Username: `codemie`
+3. Password: `replace-with-strong-password`
+
+#### macOS Happy Path
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install git curl jq uv ngrok/ngrok/ngrok
+
+git clone https://github.com/stickerdaniel/linkedin-mcp-server.git
+cd linkedin-mcp-server
+uv sync
+
+# One-time LinkedIn login (browser opens)
+uv run -m linkedin_mcp_server --login
+
+# Terminal 1: run MCP server
+uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
+```
+
+Open a second terminal:
+
+```bash
+ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
+ngrok http 8000 --basic-auth="codemie:replace-with-strong-password"
+```
+
+Then in CodeMie use:
+
+1. URL: `https://<your-ngrok-subdomain>.ngrok-free.dev/mcp`
+2. Username: `codemie`
+3. Password: `replace-with-strong-password`
+
+### Step 1: Install system tools
+
+Choose one path.
+
+#### Ubuntu
+
+```bash
+sudo apt update
+sudo apt install -y git curl jq unzip python3 python3-pip
+curl -LsSf https://astral.sh/uv/install.sh | sh
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### macOS
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install git curl jq uv
+```
+
+### Step 2: Clone this repository
+
+```bash
+git clone https://github.com/stickerdaniel/linkedin-mcp-server.git
+cd linkedin-mcp-server
+```
+
+### Step 3: Install Python dependencies
+
+```bash
+uv sync
+```
+
+### Step 4: Log in to LinkedIn once (one-time setup)
+
+This opens a real browser window. Complete login and any challenge prompts.
+
+```bash
+uv run -m linkedin_mcp_server --login
+```
+
+When login succeeds, your local profile is saved under `~/.linkedin-mcp/profile/`.
+
+### Step 5: Start MCP server on your laptop
+
+Keep this terminal open.
+
+```bash
+uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
+```
+
+### Step 6: Install ngrok (free)
+
+#### Ubuntu
+
+```bash
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/ngrok.list
+sudo apt update
+sudo apt install -y ngrok
+```
+
+#### macOS
+
+```bash
+brew install ngrok/ngrok/ngrok
+```
+
+### Step 7: Create ngrok account and connect CLI
+
+1. Create a free account at https://dashboard.ngrok.com/signup
+2. Copy your auth token from https://dashboard.ngrok.com/get-started/your-authtoken
+3. Run:
+
+```bash
+ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
+```
+
+### Step 8: Expose MCP port through HTTPS
+
+Keep this second terminal open.
+
+```bash
+ngrok http 8000 --basic-auth="codemie:replace-with-strong-password"
+```
+
+Look for the Forwarding line. It will look like:
+
+```text
+https://your-subdomain.ngrok-free.dev -> http://127.0.0.1:8000
+```
+
+Your MCP URL for CodeMie is:
+
+```text
+https://your-subdomain.ngrok-free.dev/mcp
+```
+
+### Step 9: Build the Authorization header value
+
+Create Base64 from `username:password` used in ngrok basic auth.
+
+```bash
+echo -n 'codemie:replace-with-strong-password' | base64
+```
+
+Use the output in the JSON below.
+
+### Step 10: Add MCP JSON in CodeMie
+
+Paste this JSON into CodeMie MCP configuration:
+
+```json
+{
+  "command": "npx",
+  "args": [
+    "-y",
+    "mcp-remote",
+    "https://your-subdomain.ngrok-free.dev/mcp",
+    "--header",
+    "Authorization: Basic YOUR_BASE64_USERNAME_PASSWORD"
+  ],
+  "env": {}
+}
+```
+
+If CodeMie has dedicated username/password fields, use those instead of manual header encoding.
+
+### Step 11: Test connection
+
+From any terminal, you can verify the public URL responds:
+
+```bash
+curl -s -X POST https://your-subdomain.ngrok-free.dev/mcp \
+  -u 'codemie:replace-with-strong-password' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
+```
+
+You should receive an MCP initialize result with server capabilities.
+
+### Important notes (easy to miss)
+
+1. Keep both processes running while using CodeMie:
+   1. Local MCP server terminal.
+   2. ngrok terminal.
+2. Free ngrok URLs change when you restart ngrok unless you reserve a domain.
+3. Never share your ngrok credentials publicly.
+4. Prefer a long random password instead of demo credentials.
+5. If connection fails, first confirm local MCP works on `http://127.0.0.1:8000/mcp`.
+
+### Stop everything
+
+Press Ctrl+C in MCP and ngrok terminals.
+
+### Common troubleshooting
+
+1. Error: `cannot execute binary file`
+   1. You likely installed the wrong ngrok binary for your architecture.
+   2. Use the apt or brew installation commands above.
+2. Error: `Not Acceptable: Client must accept both application/json and text/event-stream`
+   1. Add header: `Accept: application/json, text/event-stream`.
+3. CodeMie connects but tools fail
+   1. Confirm session headers are preserved by the client.
+   2. Test URL with curl command in Step 11.
+4. If I shut down my local MCP server, does MCP die?
+  1. Yes. Your public ngrok URL can stay online, but requests fail while the local backend is down.
+  2. Restart the MCP server command to restore service.
+5. If I reboot my laptop or restart ngrok, do I keep the same URL?
+  1. Usually no on ngrok free tier. URLs are ephemeral and often change on restart.
+  2. If the URL changes, update CodeMie with the new `https://.../mcp` endpoint.
+  3. For a stable URL, use a reserved domain feature.
+
 ## Installation Methods
 
 [![uvx](https://img.shields.io/badge/uvx-Quick_Install-de5fe9?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDEiIGhlaWdodD0iNDEiIHZpZXdCb3g9IjAgMCA0MSA0MSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTS01LjI4NjE5ZS0wNiAwLjE2ODYyOUwwLjA4NDMwOTggMjAuMTY4NUwwLjE1MTc2MiAzNi4xNjgzQzAuMTYxMDc1IDM4LjM3NzQgMS45NTk0NyA0MC4xNjA3IDQuMTY4NTkgNDAuMTUxNEwyMC4xNjg0IDQwLjA4NEwzMC4xNjg0IDQwLjA0MThMMzEuMTg1MiA0MC4wMzc1QzMzLjM4NzcgNDAuMDI4MiAzNS4xNjgzIDM4LjIwMjYgMzUuMTY4MyAzNlYzNkwzNy4wMDAzIDM2TDM3LjAwMDMgMzkuOTk5Mkw0MC4xNjgzIDM5Ljk5OTZMMzkuOTk5NiAtOS45NDY1M2UtMDdMMjEuNTk5OCAwLjA3NzU2ODlMMjEuNjc3NCAxNi4wMTg1TDIxLjY3NzQgMjUuOTk5OEwyMC4wNzc0IDI1Ljk5OThMMTguMzk5OCAyNS45OTk4TDE4LjQ3NzQgMTYuMDMyTDE4LjM5OTggMC4wOTEwNTkzTC01LjI4NjE5ZS0wNiAwLjE2ODYyOVoiIGZpbGw9IiNERTVGRTkiLz4KPC9zdmc+Cg==)](#-uvx-setup-recommended---universal)
