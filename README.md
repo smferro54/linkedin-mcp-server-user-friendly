@@ -23,6 +23,8 @@ Through this LinkedIn MCP server, AI assistants like Claude can connect to your 
 
 Use this checklist if you want to run MCP on your laptop and connect CodeMie from outside your local network.
 
+If you want a coding assistant to execute setup deterministically, use [ASSISTANT_RUNBOOK.md](ASSISTANT_RUNBOOK.md).
+
 ### What you need
 
 1. A LinkedIn account you can log in to from a browser.
@@ -147,7 +149,7 @@ Keep this terminal open.
 uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
 ```
 
-### Step 6: Install ngrok (free)
+### Step 6: Install cloudflared (Cloudflare Quick Tunnel)
 
 #### Ubuntu
 
@@ -164,9 +166,7 @@ sudo apt install -y cloudflared
 brew install cloudflare/cloudflare/cloudflared
 ```
 
-### Step 7: Create ngrok account and connect CLI
-
-Create Cloudflare account (optional for stability)
+### Step 7: Cloudflare account (optional for stability)
 
 Quick Tunnel works without a Cloudflare account, but:
 - Free Quick Tunnels have no uptime guarantee
@@ -187,17 +187,15 @@ You'll see output like:
 ```text
 2026-04-23T14:38:43Z INF Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
 2026-04-23T14:38:43Z INF https://your-random-subdomain.trycloudflare.com
+```
 
 Your MCP URL for CodeMie is:
 
 ```text
 https://your-random-subdomain.trycloudflare.com/mcp
 ```
-```
 
-### Step 9: Build the Authorization header value
-
-Add MCP JSON in CodeMie
+### Step 9: Add MCP JSON in CodeMie
 
 Paste this JSON into CodeMie MCP configuration (replace the URL with your tunnel output):
 
@@ -215,7 +213,6 @@ Paste this JSON into CodeMie MCP configuration (replace the URL with your tunnel
 
 If CodeMie has a dedicated URL field, paste just the URL without the `mcp-remote` wrapper.
 
-### Step 11: Test connection
 ### Step 10: Test connection
 
 From any terminal, you can verify the public URL responds:
@@ -232,11 +229,11 @@ You should receive an MCP initialize result with server capabilities.
 ### Important notes (easy to miss)
 
 1. Keep both processes running while using CodeMie:
-   1. Local MCP server terminal.
-  2. Cloudflare Quick Tunnel terminal.
+  1. Local MCP server terminal
+  2. Cloudflare Quick Tunnel terminal
 2. Free Cloudflare Quick Tunnel URLs are ephemeral and change on restart.
 3. Quick Tunnel has no built-in authentication; keep the URL private.
-5. If connection fails, first confirm local MCP works on `http://127.0.0.1:8000/mcp`.
+4. If connection fails, first confirm local MCP works on `http://127.0.0.1:8000/mcp`.
 
 ### Stop everything
 
@@ -248,17 +245,17 @@ Press Ctrl+C in MCP and Cloudflare Quick Tunnel terminals.
    1. Add header: `Accept: application/json, text/event-stream`.
 2. CodeMie connects but tools fail
    1. Confirm session headers are preserved by the client.
-  2. Test URL with curl command in Step 10.
+   2. Test URL with curl command in Step 10.
 3. If I shut down my local MCP server, does the public endpoint work?
-  1. Yes. Your public URL can stay online, but requests fail while the local backend is down.
-  2. Restart the MCP server command to restore service.
+   1. Yes. Your public URL can stay online, but requests fail while the local backend is down.
+   2. Restart the MCP server command to restore service.
 4. If I reboot my laptop or restart the tunnel, do I keep the same URL?
-  1. No on Quick Tunnel. URLs are ephemeral and change on restart.
-  2. If the URL changes, update CodeMie with the new `https://.../mcp` endpoint.
-  3. For a stable URL, create a Cloudflare account and use a named Tunnel with a custom domain.
+   1. No on Quick Tunnel. URLs are ephemeral and change on restart.
+   2. If the URL changes, update CodeMie with the new `https://.../mcp` endpoint.
+   3. For a stable URL, create a Cloudflare account and use a named Tunnel with a custom domain.
 5. Can I use Cloudflare with my own domain?
-  1. Yes. See the [named Tunnel setup guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps).
-  2. This gives you predictable URLs and better SLA guarantees.
+   1. Yes. See the [named Tunnel setup guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps).
+   2. This gives you predictable URLs and better SLA guarantees.
 
 ## Installation Methods
 
