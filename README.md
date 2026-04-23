@@ -28,7 +28,7 @@ Use this checklist if you want to run MCP on your laptop and connect CodeMie fro
 1. A LinkedIn account you can log in to from a browser.
 2. A laptop (Ubuntu Linux or macOS).
 3. Internet access.
-4. A free ngrok account.
+4. A free Cloudflare account (optional; Quick Tunnel works without one).
 5. CodeMie access.
 
 ### Happy Path (copy/paste)
@@ -56,27 +56,22 @@ uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --por
 Open a second terminal:
 
 ```bash
-curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
-  | sudo tee /etc/apt/sources.list.d/ngrok.list
-sudo apt update && sudo apt install -y ngrok
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-main.gpg
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+sudo apt update && sudo apt install -y cloudflared
 
-ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
-ngrok http 8000 --basic-auth="codemie:replace-with-strong-password"
+cloudflared tunnel --url http://127.0.0.1:8000
 ```
 
 Then in CodeMie use:
 
-1. URL: `https://<your-ngrok-subdomain>.ngrok-free.dev/mcp`
-2. Username: `codemie`
-3. Password: `replace-with-strong-password`
+1. URL: Copy from tunnel output (e.g., `https://example-site-name.trycloudflare.com/mcp`)
 
 #### macOS Happy Path
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install git curl jq uv ngrok/ngrok/ngrok
+brew install git curl jq uv
 
 git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
 cd linkedin-mcp-server
@@ -92,15 +87,13 @@ uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --por
 Open a second terminal:
 
 ```bash
-ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
-ngrok http 8000 --basic-auth="codemie:replace-with-strong-password"
+brew install cloudflare/cloudflare/cloudflared
+cloudflared tunnel --url http://127.0.0.1:8000
 ```
 
 Then in CodeMie use:
 
-1. URL: `https://<your-ngrok-subdomain>.ngrok-free.dev/mcp`
-2. Username: `codemie`
-3. Password: `replace-with-strong-password`
+1. URL: Copy from tunnel output (e.g., `https://example-site-name.trycloudflare.com/mcp`)
 
 ### Step 1: Install system tools
 
@@ -159,63 +152,54 @@ uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --por
 #### Ubuntu
 
 ```bash
-curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
-  | sudo tee /etc/apt/sources.list.d/ngrok.list
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-main.gpg
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
 sudo apt update
-sudo apt install -y ngrok
+sudo apt install -y cloudflared
 ```
 
 #### macOS
 
 ```bash
-brew install ngrok/ngrok/ngrok
+brew install cloudflare/cloudflare/cloudflared
 ```
 
 ### Step 7: Create ngrok account and connect CLI
 
-1. Create a free account at https://dashboard.ngrok.com/signup
-2. Copy your auth token from https://dashboard.ngrok.com/get-started/your-authtoken
-3. Run:
+Create Cloudflare account (optional for stability)
 
-```bash
-ngrok config add-authtoken YOUR_NGROK_AUTHTOKEN
-```
+Quick Tunnel works without a Cloudflare account, but:
+- Free Quick Tunnels have no uptime guarantee
+- URLs are ephemeral (change on restart)
+
+For a stable setup with a custom domain, create an account at https://dash.cloudflare.com/sign-up and follow the [named Tunnel guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps).
 
 ### Step 8: Expose MCP port through HTTPS
 
 Keep this second terminal open.
 
 ```bash
-ngrok http 8000 --basic-auth="codemie:replace-with-strong-password"
+cloudflared tunnel --url http://127.0.0.1:8000
 ```
 
-Look for the Forwarding line. It will look like:
+You'll see output like:
 
 ```text
-https://your-subdomain.ngrok-free.dev -> http://127.0.0.1:8000
-```
+2026-04-23T14:38:43Z INF Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
+2026-04-23T14:38:43Z INF https://your-random-subdomain.trycloudflare.com
 
 Your MCP URL for CodeMie is:
 
 ```text
-https://your-subdomain.ngrok-free.dev/mcp
+https://your-random-subdomain.trycloudflare.com/mcp
+```
 ```
 
 ### Step 9: Build the Authorization header value
 
-Create Base64 from `username:password` used in ngrok basic auth.
+Add MCP JSON in CodeMie
 
-```bash
-echo -n 'codemie:replace-with-strong-password' | base64
-```
-
-Use the output in the JSON below.
-
-### Step 10: Add MCP JSON in CodeMie
-
-Paste this JSON into CodeMie MCP configuration:
+Paste this JSON into CodeMie MCP configuration (replace the URL with your tunnel output):
 
 ```json
 {
@@ -223,23 +207,21 @@ Paste this JSON into CodeMie MCP configuration:
   "args": [
     "-y",
     "mcp-remote",
-    "https://your-subdomain.ngrok-free.dev/mcp",
-    "--header",
-    "Authorization: Basic YOUR_BASE64_USERNAME_PASSWORD"
+    "https://your-random-subdomain.trycloudflare.com/mcp"
   ],
   "env": {}
 }
 ```
 
-If CodeMie has dedicated username/password fields, use those instead of manual header encoding.
+If CodeMie has a dedicated URL field, paste just the URL without the `mcp-remote` wrapper.
 
 ### Step 11: Test connection
+### Step 10: Test connection
 
 From any terminal, you can verify the public URL responds:
 
 ```bash
-curl -s -X POST https://your-subdomain.ngrok-free.dev/mcp \
-  -u 'codemie:replace-with-strong-password' \
+curl -s -X POST https://your-random-subdomain.trycloudflare.com/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
@@ -251,33 +233,32 @@ You should receive an MCP initialize result with server capabilities.
 
 1. Keep both processes running while using CodeMie:
    1. Local MCP server terminal.
-   2. ngrok terminal.
-2. Free ngrok URLs change when you restart ngrok unless you reserve a domain.
-3. Never share your ngrok credentials publicly.
-4. Prefer a long random password instead of demo credentials.
+  2. Cloudflare Quick Tunnel terminal.
+2. Free Cloudflare Quick Tunnel URLs are ephemeral and change on restart.
+3. Quick Tunnel has no built-in authentication; keep the URL private.
 5. If connection fails, first confirm local MCP works on `http://127.0.0.1:8000/mcp`.
 
 ### Stop everything
 
-Press Ctrl+C in MCP and ngrok terminals.
+Press Ctrl+C in MCP and Cloudflare Quick Tunnel terminals.
 
 ### Common troubleshooting
 
-1. Error: `cannot execute binary file`
-   1. You likely installed the wrong ngrok binary for your architecture.
-   2. Use the apt or brew installation commands above.
-2. Error: `Not Acceptable: Client must accept both application/json and text/event-stream`
+1. Error: `Not Acceptable: Client must accept both application/json and text/event-stream`
    1. Add header: `Accept: application/json, text/event-stream`.
-3. CodeMie connects but tools fail
+2. CodeMie connects but tools fail
    1. Confirm session headers are preserved by the client.
-   2. Test URL with curl command in Step 11.
-4. If I shut down my local MCP server, does MCP die?
-  1. Yes. Your public ngrok URL can stay online, but requests fail while the local backend is down.
+  2. Test URL with curl command in Step 10.
+3. If I shut down my local MCP server, does the public endpoint work?
+  1. Yes. Your public URL can stay online, but requests fail while the local backend is down.
   2. Restart the MCP server command to restore service.
-5. If I reboot my laptop or restart ngrok, do I keep the same URL?
-  1. Usually no on ngrok free tier. URLs are ephemeral and often change on restart.
+4. If I reboot my laptop or restart the tunnel, do I keep the same URL?
+  1. No on Quick Tunnel. URLs are ephemeral and change on restart.
   2. If the URL changes, update CodeMie with the new `https://.../mcp` endpoint.
-  3. For a stable URL, use a reserved domain feature.
+  3. For a stable URL, create a Cloudflare account and use a named Tunnel with a custom domain.
+5. Can I use Cloudflare with my own domain?
+  1. Yes. See the [named Tunnel setup guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps).
+  2. This gives you predictable URLs and better SLA guarantees.
 
 ## Installation Methods
 
