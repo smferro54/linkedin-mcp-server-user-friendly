@@ -416,7 +416,7 @@ class TestBuildReferences:
                     "text": "Senior Engineer",
                 },
                 {
-                    "href": "https://www.linkedin.com/in/stickerdaniel/",
+                    "href": "https://www.linkedin.com/in/smferro54/",
                     "text": "Daniel Sticker",
                 },
             ],
@@ -432,7 +432,7 @@ class TestBuildReferences:
             },
             {
                 "kind": "person",
-                "url": "/in/stickerdaniel/",
+                "url": "/in/smferro54/",
                 "text": "Daniel Sticker",
                 "context": "search result",
             },

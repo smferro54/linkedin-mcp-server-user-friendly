@@ -42,7 +42,7 @@ def register_person_tools(mcp: FastMCP) -> None:
         Get a specific person's LinkedIn profile.
 
         Args:
-            linkedin_username: LinkedIn username (e.g., "stickerdaniel", "williamhgates")
+            linkedin_username: LinkedIn username (e.g., "smferro54", "williamhgates")
             ctx: FastMCP context for progress reporting
             sections: Comma-separated list of extra sections to scrape.
                 The main profile page is always included.
@@ -170,7 +170,7 @@ def register_person_tools(mcp: FastMCP) -> None:
         prompt for user confirmation before execution.
 
         Args:
-            linkedin_username: LinkedIn username (e.g., "stickerdaniel", "williamhgates")
+            linkedin_username: LinkedIn username (e.g., "smferro54", "williamhgates")
             ctx: FastMCP context for progress reporting
             note: Optional note to include with the invitation
 
@@ -235,7 +235,7 @@ def register_person_tools(mcp: FastMCP) -> None:
 
         Args:
             linkedin_username: LinkedIn username of the profile page to scrape
-                (e.g., "stickerdaniel", "williamhgates")
+                (e.g., "smferro54", "williamhgates")
             ctx: FastMCP context for progress reporting
 
         Returns:

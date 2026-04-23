@@ -24,7 +24,7 @@ Create a browser profile locally, then mount it into Docker. You still need [uv]
 uvx linkedin-scraper-mcp@latest --login
 ```
 
-This opens a browser window where you log in manually (5 minute timeout for 2FA, captcha, etc.). The browser profile and cookies are saved under `~/.linkedin-mcp/`. On startup, Docker derives a Linux browser profile from your host cookies and creates a fresh session each time. For better stability, consider the [uvx setup](https://github.com/stickerdaniel/linkedin-mcp-server#-uvx-setup-recommended---universal).
+This opens a browser window where you log in manually (5 minute timeout for 2FA, captcha, etc.). The browser profile and cookies are saved under `~/.linkedin-mcp/`. On startup, Docker derives a Linux browser profile from your host cookies and creates a fresh session each time. For better stability, consider the [uvx setup](https://github.com/smferro54/linkedin-mcp-server-user-friendly#-uvx-setup-recommended---universal).
 
 **Step 2: Configure Claude Desktop with Docker**
 
@@ -36,7 +36,7 @@ This opens a browser window where you log in manually (5 minute timeout for 2FA,
       "args": [
         "run", "--rm", "-i",
         "-v", "~/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
-        "stickerdaniel/linkedin-mcp-server:latest"
+        "smferro54/linkedin-mcp-server-user-friendly:latest"
       ]
     }
   }
@@ -80,7 +80,7 @@ This opens a browser window where you log in manually (5 minute timeout for 2FA,
         "run", "-i", "--rm",
         "-v", "~/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
         "-e", "TIMEOUT=10000",
-        "stickerdaniel/linkedin-mcp-server"
+        "smferro54/linkedin-mcp-server-user-friendly"
       ]
     }
   }
@@ -89,5 +89,5 @@ This opens a browser window where you log in manually (5 minute timeout for 2FA,
 
 ## Repository
 
-- **Source**: <https://github.com/stickerdaniel/linkedin-mcp-server>
+- **Source**: <https://github.com/smferro54/linkedin-mcp-server-user-friendly>
 - **License**: Apache 2.0
