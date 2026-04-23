@@ -23,6 +23,8 @@ Through this LinkedIn MCP server, AI assistants like Claude can connect to your 
 
 Use this checklist if you want to run MCP on your laptop and connect CodeMie from outside your local network.
 
+This flow is headless by default after login: only the one-time `--login` step opens a browser window.
+
 If you want a coding assistant to execute setup deterministically, use [ASSISTANT_RUNBOOK.md](ASSISTANT_RUNBOOK.md).
 
 ### What you need
@@ -51,7 +53,7 @@ uv sync
 # One-time LinkedIn login (browser opens)
 uv run -m linkedin_mcp_server --login
 
-# Terminal 1: run MCP server
+# Terminal 1: run MCP server (headless by default)
 uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
 ```
 
@@ -82,7 +84,7 @@ uv sync
 # One-time LinkedIn login (browser opens)
 uv run -m linkedin_mcp_server --login
 
-# Terminal 1: run MCP server
+# Terminal 1: run MCP server (headless by default)
 uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
 ```
 
@@ -141,13 +143,15 @@ uv run -m linkedin_mcp_server --login
 
 When login succeeds, your local profile is saved under `~/.linkedin-mcp/profile/`.
 
-### Step 5: Start MCP server on your laptop
+### Step 5: Start MCP server on your laptop (headless)
 
 Keep this terminal open.
 
 ```bash
 uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
 ```
+
+If you want to watch browser actions for debugging only, add `--no-headless`.
 
 ### Step 6: Install cloudflared (Cloudflare Quick Tunnel)
 
@@ -234,6 +238,7 @@ You should receive an MCP initialize result with server capabilities.
 2. Free Cloudflare Quick Tunnel URLs are ephemeral and change on restart.
 3. Quick Tunnel has no built-in authentication; keep the URL private.
 4. If connection fails, first confirm local MCP works on `http://127.0.0.1:8000/mcp`.
+5. If you close a debug browser started with `--no-headless`, scraping can fail with `TargetClosedError`. Restart the MCP server and, if needed, run `--login` again.
 
 ### Stop everything
 

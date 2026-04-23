@@ -1,6 +1,8 @@
-# Assistant Runbook: Local MCP + Cloudflare Quick Tunnel + CodeMie
+# Assistant Runbook: Headless MCP + Cloudflare Quick Tunnel + CodeMie
 
 Use this runbook when a coding assistant needs to set up this MCP server on a laptop and connect it to CodeMie.
+
+Default runtime is headless. Only the one-time login step is interactive.
 
 ## Goal
 
@@ -11,6 +13,7 @@ Expose local MCP endpoint `http://127.0.0.1:8000/mcp` through Cloudflare Quick T
 1. Quick Tunnel is temporary and unauthenticated.
 2. URL changes when tunnel restarts.
 3. Keep setup to local laptop only (`127.0.0.1`).
+4. `--login` opens a browser window; normal MCP runtime is headless unless `--no-headless` is used.
 
 ## Required Inputs
 
@@ -77,13 +80,19 @@ Expected:
 2. User logs in and completes challenge prompts.
 3. Command exits successfully.
 
-### 4) Start local MCP server (Terminal A)
+### 4) Start local MCP server (Terminal A, headless)
 
 ```bash
 uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
 ```
 
 Keep Terminal A running.
+
+Optional debug mode (visible browser):
+
+```bash
+uv run -m linkedin_mcp_server --no-headless --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
+```
 
 ### 5) Validate local MCP initialize
 
@@ -190,6 +199,11 @@ Use this template with active tunnel URL:
 
 4. LinkedIn tools fail after initialize
 - Re-run `uv run -m linkedin_mcp_server --login`.
+
+5. `TargetClosedError: Target page, context or browser has been closed`
+- If using `--no-headless`, the debug browser was likely closed manually.
+- Restart MCP server in headless mode and retry.
+- If still failing, re-run `uv run -m linkedin_mcp_server --login` and restart MCP.
 
 ## Operational Notes
 
