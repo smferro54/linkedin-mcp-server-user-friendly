@@ -67,7 +67,7 @@ uv --version
 
 ```bash
 git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
-cd linkedin-mcp-server
+cd linkedin-mcp-server-user-friendly
 uv sync
 ```
 
@@ -248,6 +248,8 @@ Use this template with active tunnel URL:
   "audience": null
 }
 ```
+
+### 10) Take the JSON and paste it to Codemie
 
 ## Failure Handling
 
