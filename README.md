@@ -19,7 +19,7 @@ Through this LinkedIn MCP server, AI assistants like Claude can connect to your 
 > **What if my agents execute too many actions?**
 > LinkedIn may send you a warning about automated tool usage. If that happens, reduce your automation volume. This MCP executes tool calls sequentially via a queue but has no built-in rate limits. Prompt your agents responsibly.
 
-## Non-Technical Quickstart (Ubuntu or macOS to CodeMie)
+## Non-Technical Quickstart (Ubuntu, macOS, or Windows to CodeMie)
 
 Use this checklist if you want to run MCP on your laptop and connect CodeMie from outside your local network.
 
@@ -30,7 +30,7 @@ If you want a coding assistant to execute setup deterministically, use [ASSISTAN
 ### What you need
 
 1. A LinkedIn account you can log in to from a browser.
-2. A laptop (Ubuntu Linux or macOS).
+2. A laptop (Ubuntu Linux, macOS, or Windows).
 3. Internet access.
 4. A free Cloudflare account (optional; Quick Tunnel works without one).
 5. CodeMie access.
@@ -99,6 +99,34 @@ Then in CodeMie use:
 
 1. URL: Copy from tunnel output (e.g., `https://example-site-name.trycloudflare.com/mcp`)
 
+#### Windows (PowerShell) Happy Path
+
+```powershell
+winget install --id Git.Git -e
+winget install --id astral-sh.uv -e
+
+git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
+cd linkedin-mcp-server
+uv sync
+
+# One-time LinkedIn login (browser opens)
+uv run -m linkedin_mcp_server --login
+
+# Terminal 1: run MCP server (headless by default)
+uv run -m linkedin_mcp_server --transport streamable-http --host 127.0.0.1 --port 8000 --path /mcp
+```
+
+Open a second PowerShell window:
+
+```powershell
+winget install --id Cloudflare.cloudflared -e
+cloudflared tunnel --url http://127.0.0.1:8000
+```
+
+Then in CodeMie use:
+
+1. URL: Copy from tunnel output (e.g., `https://example-site-name.trycloudflare.com/mcp`)
+
 ### Step 1: Install system tools
 
 Choose one path.
@@ -119,6 +147,15 @@ source ~/.bashrc
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install git curl jq uv
 ```
+
+#### Windows (PowerShell)
+
+```powershell
+winget install --id Git.Git -e
+winget install --id astral-sh.uv -e
+```
+
+Open a new PowerShell window after install.
 
 ### Step 2: Clone this repository
 
@@ -168,6 +205,12 @@ sudo apt install -y cloudflared
 
 ```bash
 brew install cloudflare/cloudflare/cloudflared
+```
+
+#### Windows (PowerShell)
+
+```powershell
+winget install --id Cloudflare.cloudflared -e
 ```
 
 ### Step 7: Cloudflare account (optional for stability)
@@ -226,6 +269,31 @@ curl -s -X POST https://your-random-subdomain.trycloudflare.com/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
+```
+
+Windows (PowerShell) equivalent:
+
+```powershell
+$headers = @{
+  "Content-Type" = "application/json"
+  "Accept" = "application/json, text/event-stream"
+}
+
+$body = @{
+  jsonrpc = "2.0"
+  id = 1
+  method = "initialize"
+  params = @{
+    protocolVersion = "2025-03-26"
+    capabilities = @{}
+    clientInfo = @{
+      name = "test"
+      version = "1.0"
+    }
+  }
+} | ConvertTo-Json -Depth 10
+
+Invoke-RestMethod -Method Post -Uri "https://your-random-subdomain.trycloudflare.com/mcp" -Headers $headers -Body $body
 ```
 
 You should receive an MCP initialize result with server capabilities.
