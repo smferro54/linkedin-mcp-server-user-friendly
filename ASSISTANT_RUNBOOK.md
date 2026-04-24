@@ -55,6 +55,8 @@ winget install --id Git.Git -e
 winget install --id astral-sh.uv -e
 ```
 
+If using Windows, use WSL version 2 (not WSL 1).
+
 Open a new PowerShell window after install.
 
 Validation:
@@ -271,6 +273,45 @@ Use this template with active tunnel URL:
 - If using `--no-headless`, the debug browser was likely closed manually.
 - Restart MCP server in headless mode and retry.
 - If still failing, re-run `uv run -m linkedin_mcp_server --login` and restart MCP.
+
+6. Browser does not start in WSL / missing Linux browser libraries
+- Ensure Windows is using WSL 2.
+- In WSL (Ubuntu), install required browser dependencies:
+
+```bash
+sudo apt update && sudo apt install -y \
+  libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+  libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 \
+  libgbm1 libasound2t64 libpangocairo-1.0-0 libpango-1.0-0
+```
+
+7. cloudflared error about ping group range (for example: Group ID 1000 is not between ping group range)
+- cloudflared may fail to ping when the current user group is outside `ping_group_range`.
+- Check your group ID:
+
+```bash
+id -g
+cat /proc/sys/net/ipv4/ping_group_range
+```
+
+- Temporary fix (until reboot):
+
+```bash
+sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+```
+
+- Persistent fix:
+
+```bash
+echo 'net.ipv4.ping_group_range = 0 2147483647' | sudo tee /etc/sysctl.d/99-cloudflared-ping.conf
+sudo sysctl --system
+```
+
+- Retry the tunnel command after applying the change:
+
+```bash
+cloudflared tunnel --url http://127.0.0.1:8000
+```
 
 ## Operational Notes
 

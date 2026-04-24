@@ -47,7 +47,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 
 git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
-cd linkedin-mcp-server
+cd linkedin-mcp-server-user-friendly
 uv sync
 
 # One-time LinkedIn login (browser opens)
@@ -78,7 +78,7 @@ Then in CodeMie use:
 brew install git curl jq uv
 
 git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
-cd linkedin-mcp-server
+cd linkedin-mcp-server-user-friendly
 uv sync
 
 # One-time LinkedIn login (browser opens)
@@ -106,7 +106,7 @@ winget install --id Git.Git -e
 winget install --id astral-sh.uv -e
 
 git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
-cd linkedin-mcp-server
+cd linkedin-mcp-server-user-friendly
 uv sync
 
 # One-time LinkedIn login (browser opens)
@@ -126,6 +126,7 @@ cloudflared tunnel --url http://127.0.0.1:8000
 Then in CodeMie use:
 
 1. URL: Copy from tunnel output (e.g., `https://example-site-name.trycloudflare.com/mcp`)
+2. Windows users should use WSL 2, not WSL 1.
 
 ### Step 1: Install system tools
 
@@ -155,13 +156,15 @@ winget install --id Git.Git -e
 winget install --id astral-sh.uv -e
 ```
 
+If using Windows, use WSL 2 (not WSL 1).
+
 Open a new PowerShell window after install.
 
 ### Step 2: Clone this repository
 
 ```bash
 git clone https://github.com/smferro54/linkedin-mcp-server-user-friendly.git
-cd linkedin-mcp-server
+cd linkedin-mcp-server-user-friendly
 ```
 
 ### Step 3: Install Python dependencies
@@ -329,6 +332,43 @@ Press Ctrl+C in MCP and Cloudflare Quick Tunnel terminals.
 5. Can I use Cloudflare with my own domain?
    1. Yes. See the [named Tunnel setup guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps).
    2. This gives you predictable URLs and better SLA guarantees.
+6. Browser does not start in WSL or reports missing Linux browser libraries
+  1. Make sure Windows is using WSL 2.
+  2. In WSL Ubuntu, install the browser dependencies:
+
+```bash
+sudo apt update && sudo apt install -y \
+  libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+  libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 \
+  libgbm1 libasound2t64 libpangocairo-1.0-0 libpango-1.0-0
+```
+
+7. cloudflared says your group is outside ping group range
+  1. Check your group ID and the current kernel setting:
+
+```bash
+id -g
+cat /proc/sys/net/ipv4/ping_group_range
+```
+
+  2. Temporary fix until reboot:
+
+```bash
+sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+```
+
+  3. Persistent fix:
+
+```bash
+echo 'net.ipv4.ping_group_range = 0 2147483647' | sudo tee /etc/sysctl.d/99-cloudflared-ping.conf
+sudo sysctl --system
+```
+
+  4. Retry the tunnel command:
+
+```bash
+cloudflared tunnel --url http://127.0.0.1:8000
+```
 
 ## Installation Methods
 
