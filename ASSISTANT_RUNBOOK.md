@@ -17,7 +17,7 @@ Expose local MCP endpoint `http://127.0.0.1:8000/mcp` through Cloudflare Quick T
 
 ## Required Inputs
 
-1. OS: `ubuntu` or `macos`
+1. OS: `ubuntu`, `macos`, or `windows` (PowerShell)
 2. Git repo path (or clone URL)
 3. Confirmation that user can complete LinkedIn login in browser
 
@@ -47,6 +47,15 @@ macOS:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install git curl jq uv
 ```
+
+Windows (PowerShell):
+
+```powershell
+winget install --id Git.Git -e
+winget install --id astral-sh.uv -e
+```
+
+Open a new PowerShell window after install.
 
 Validation:
 
@@ -105,6 +114,31 @@ curl -s -X POST http://127.0.0.1:8000/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
 ```
 
+Windows (PowerShell) equivalent:
+
+```powershell
+$headers = @{
+  "Content-Type" = "application/json"
+  "Accept" = "application/json, text/event-stream"
+}
+
+$body = @{
+  jsonrpc = "2.0"
+  id = 1
+  method = "initialize"
+  params = @{
+    protocolVersion = "2025-03-26"
+    capabilities = @{}
+    clientInfo = @{
+      name = "test"
+      version = "1.0"
+    }
+  }
+} | ConvertTo-Json -Depth 10
+
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/mcp" -Headers $headers -Body $body
+```
+
 Expected:
 
 JSON response containing `"result"` and `"serverInfo"`.
@@ -124,6 +158,12 @@ macOS:
 
 ```bash
 brew install cloudflare/cloudflare/cloudflared
+```
+
+Windows (PowerShell):
+
+```powershell
+winget install --id Cloudflare.cloudflared -e
 ```
 
 Validation:
@@ -155,6 +195,31 @@ curl -s -X POST https://example-name.trycloudflare.com/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
+```
+
+Windows (PowerShell) equivalent:
+
+```powershell
+$headers = @{
+  "Content-Type" = "application/json"
+  "Accept" = "application/json, text/event-stream"
+}
+
+$body = @{
+  jsonrpc = "2.0"
+  id = 1
+  method = "initialize"
+  params = @{
+    protocolVersion = "2025-03-26"
+    capabilities = @{}
+    clientInfo = @{
+      name = "test"
+      version = "1.0"
+    }
+  }
+} | ConvertTo-Json -Depth 10
+
+Invoke-RestMethod -Method Post -Uri "https://example-name.trycloudflare.com/mcp" -Headers $headers -Body $body
 ```
 
 Expected:
